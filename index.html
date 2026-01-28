@@ -2,21 +2,19 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Scroll Würfel</title>
+<title>Scroll Würfel – verschiedene Seiten</title>
+
 <style>
     body {
-        height: 300vh; /* Scroll-Länge */
+        height: 300vh;
         margin: 0;
         background: #111;
-        display: flex;
-        justify-content: center;
-        align-items: center;
     }
 
     .scene {
         width: 200px;
         height: 200px;
-        perspective: 600px;
+        perspective: 800px;
         position: fixed;
         top: 50%;
         left: 50%;
@@ -34,28 +32,36 @@
         position: absolute;
         width: 200px;
         height: 200px;
-        background: rgba(0, 150, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        font-family: Arial, sans-serif;
+        font-weight: bold;
+        color: white;
         border: 2px solid #fff;
+        box-sizing: border-box;
     }
 
-    .front  { transform: rotateY(0deg) translateZ(100px); }
-    .back   { transform: rotateY(180deg) translateZ(100px); }
-    .right  { transform: rotateY(90deg) translateZ(100px); }
-    .left   { transform: rotateY(-90deg) translateZ(100px); }
-    .top    { transform: rotateX(90deg) translateZ(100px); }
-    .bottom { transform: rotateX(-90deg) translateZ(100px); }
+    .front  { background: #e74c3c; transform: rotateY(0deg) translateZ(100px); }
+    .back   { background: #8e44ad; transform: rotateY(180deg) translateZ(100px); }
+    .right  { background: #3498db; transform: rotateY(90deg) translateZ(100px); }
+    .left   { background: #f39c12; transform: rotateY(-90deg) translateZ(100px); }
+    .top    { background: #2ecc71; transform: rotateX(90deg) translateZ(100px); }
+    .bottom { background: #1abc9c; transform: rotateX(-90deg) translateZ(100px); }
 </style>
 </head>
+
 <body>
 
 <div class="scene">
     <div class="cube" id="cube">
-        <div class="face front"></div>
-        <div class="face back"></div>
-        <div class="face right"></div>
-        <div class="face left"></div>
-        <div class="face top"></div>
-        <div class="face bottom"></div>
+        <div class="face front">1</div>
+        <div class="face back">2</div>
+        <div class="face right">3</div>
+        <div class="face left">4</div>
+        <div class="face top">5</div>
+        <div class="face bottom">6</div>
     </div>
 </div>
 
@@ -63,10 +69,10 @@
     const cube = document.getElementById("cube");
 
     window.addEventListener("scroll", () => {
-        const scrollY = window.scrollY;
+        const scroll = window.scrollY;
         cube.style.transform = `
-            rotateX(${scrollY * 0.3}deg)
-            rotateY(${scrollY * 0.3}deg)
+            rotateX(${scroll * 0.25}deg)
+            rotateY(${scroll * 0.35}deg)
         `;
     });
 </script>
