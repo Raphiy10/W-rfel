@@ -2,79 +2,132 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Scroll Würfel – verschiedene Seiten</title>
+<title>Interaktiver Würfel</title>
 
 <style>
-    body {
-        height: 300vh;
-        margin: 0;
-        background: #111;
-    }
+body {
+    margin: 0;
+    background: #111;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    height: 100vh;
+}
 
-    .scene {
-        width: 200px;
-        height: 200px;
-        perspective: 800px;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+/* UI */
+.panel {
+    width: 260px;
+    padding: 15px;
+    background: #1c1c1c;
+    box-sizing: border-box;
+}
 
-    .cube {
-        width: 100%;
-        height: 100%;
-        position: relative;
-        transform-style: preserve-3d;
-    }
+.panel input {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 6px;
+    font-size: 14px;
+}
 
-    .face {
-        position: absolute;
-        width: 200px;
-        height: 200px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 48px;
-        font-family: Arial, sans-serif;
-        font-weight: bold;
-        color: white;
-        border: 2px solid #fff;
-        box-sizing: border-box;
-    }
+/* 3D */
+.scene {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 800px;
+}
 
-    .front  { background: #e74c3c; transform: rotateY(0deg) translateZ(100px); }
-    .back   { background: #8e44ad; transform: rotateY(180deg) translateZ(100px); }
-    .right  { background: #3498db; transform: rotateY(90deg) translateZ(100px); }
-    .left   { background: #f39c12; transform: rotateY(-90deg) translateZ(100px); }
-    .top    { background: #2ecc71; transform: rotateX(90deg) translateZ(100px); }
-    .bottom { background: #1abc9c; transform: rotateX(-90deg) translateZ(100px); }
+.cube {
+    width: 200px;
+    height: 200px;
+    position: relative;
+    transform-style: preserve-3d;
+    cursor: grab;
+}
+
+.face {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    font-weight: bold;
+    border: 2px solid white;
+    box-sizing: border-box;
+}
+
+.front  { background:#e74c3c; transform: rotateY(0deg) translateZ(100px); }
+.back   { background:#8e44ad; transform: rotateY(180deg) translateZ(100px); }
+.right  { background:#3498db; transform: rotateY(90deg) translateZ(100px); }
+.left   { background:#f39c12; transform: rotateY(-90deg) translateZ(100px); }
+.top    { background:#2ecc71; transform: rotateX(90deg) translateZ(100px); }
+.bottom { background:#1abc9c; transform: rotateX(-90deg) translateZ(100px); }
 </style>
 </head>
 
 <body>
 
+<div class="panel">
+    <h3>Würfel-Seiten</h3>
+    <input placeholder="Front"  oninput="setText('front', this.value)">
+    <input placeholder="Back"   oninput="setText('back', this.value)">
+    <input placeholder="Right"  oninput="setText('right', this.value)">
+    <input placeholder="Left"   oninput="setText('left', this.value)">
+    <input placeholder="Top"    oninput="setText('top', this.value)">
+    <input placeholder="Bottom" oninput="setText('bottom', this.value)">
+</div>
+
 <div class="scene">
     <div class="cube" id="cube">
-        <div class="face front">1</div>
-        <div class="face back">2</div>
-        <div class="face right">3</div>
-        <div class="face left">4</div>
-        <div class="face top">5</div>
-        <div class="face bottom">6</div>
+        <div class="face front">Front</div>
+        <div class="face back">Back</div>
+        <div class="face right">Right</div>
+        <div class="face left">Left</div>
+        <div class="face top">Top</div>
+        <div class="face bottom">Bottom</div>
     </div>
 </div>
 
 <script>
-    const cube = document.getElementById("cube");
+const cube = document.getElementById("cube");
+let isDragging = false;
+let lastX = 0, lastY = 0;
+let rotX = -20, rotY = 30;
 
-    window.addEventListener("scroll", () => {
-        const scroll = window.scrollY;
-        cube.style.transform = `
-            rotateX(${scroll * 0.25}deg)
-            rotateY(${scroll * 0.35}deg)
-        `;
-    });
+cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+
+// Maussteuerung
+cube.addEventListener("mousedown", e => {
+    isDragging = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
+    cube.style.cursor = "grabbing";
+});
+
+window.addEventListener("mouseup", () => {
+    isDragging = false;
+    cube.style.cursor = "grab";
+});
+
+window.addEventListener("mousemove", e => {
+    if (!isDragging) return;
+
+    rotY += (e.clientX - lastX) * 0.5;
+    rotX -= (e.clientY - lastY) * 0.5;
+
+    lastX = e.clientX;
+    lastY = e.clientY;
+
+    cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+});
+
+// Text ändern
+function setText(face, value) {
+    document.querySelector("." + face).textContent = value || face;
+}
 </script>
 
 </body>
