@@ -2,8 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Würfel mit Zufall</title>
-
+<title>Dynamischer Würfel</title>
 <style>
 body {
     margin: 0;
@@ -16,20 +15,34 @@ body {
 
 /* UI */
 .panel {
-    width: 260px;
+    width: 280px;
     padding: 15px;
     background: #1c1c1c;
     box-sizing: border-box;
 }
 
-.panel input, .panel button {
+.panel input[type="text"] {
     width: 100%;
-    margin-bottom: 10px;
-    padding: 8px;
+    margin-bottom: 5px;
+    padding: 6px;
     font-size: 14px;
 }
 
+.panel label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.panel input[type="checkbox"] {
+    margin-right: 6px;
+}
+
 .panel button {
+    width: 100%;
+    padding: 8px;
+    margin-top: 10px;
+    font-size: 14px;
     cursor: pointer;
     background: #3498db;
     border: none;
@@ -52,7 +65,7 @@ body {
     position: relative;
     transform-style: preserve-3d;
     cursor: grab;
-    transition: transform 1s ease-in-out;
+    transition: transform 0.6s ease-in-out;
 }
 
 .face {
@@ -68,101 +81,95 @@ body {
     box-sizing: border-box;
 }
 
-.front  { background:#e74c3c; transform: rotateY(0deg) translateZ(100px); }
-.back   { background:#8e44ad; transform: rotateY(180deg) translateZ(100px); }
-.right  { background:#3498db; transform: rotateY(90deg) translateZ(100px); }
-.left   { background:#f39c12; transform: rotateY(-90deg) translateZ(100px); }
-.top    { background:#2ecc71; transform: rotateX(90deg) translateZ(100px); }
-.bottom { background:#1abc9c; transform: rotateX(-90deg) translateZ(100px); }
+.front  { background:#e74c3c; }
+.back   { background:#8e44ad; }
+.right  { background:#3498db; }
+.left   { background:#f39c12; }
+.top    { background:#2ecc71; }
+.bottom { background:#1abc9c; }
 </style>
 </head>
-
 <body>
 
 <div class="panel">
     <h3>Würfel-Seiten</h3>
-    <input placeholder="Front"  oninput="setText('front', this.value)">
-    <input placeholder="Back"   oninput="setText('back', this.value)">
-    <input placeholder="Right"  oninput="setText('right', this.value)">
-    <input placeholder="Left"   oninput="setText('left', this.value)">
-    <input placeholder="Top"    oninput="setText('top', this.value)">
-    <input placeholder="Bottom" oninput="setText('bottom', this.value)">
+    <label><input type="checkbox" checked onchange="updateCube()">Front <input type="text" placeholder="Front" oninput="setText('front', this.value)"></label>
+    <label><input type="checkbox" checked onchange="updateCube()">Back <input type="text" placeholder="Back" oninput="setText('back', this.value)"></label>
+    <label><input type="checkbox" checked onchange="updateCube()">Right <input type="text" placeholder="Right" oninput="setText('right', this.value)"></label>
+    <label><input type="checkbox" checked onchange="updateCube()">Left <input type="text" placeholder="Left" oninput="setText('left', this.value)"></label>
+    <label><input type="checkbox" checked onchange="updateCube()">Top <input type="text" placeholder="Top" oninput="setText('top', this.value)"></label>
+    <label><input type="checkbox" checked onchange="updateCube()">Bottom <input type="text" placeholder="Bottom" oninput="setText('bottom', this.value)"></label>
 
     <button onclick="rollCube()">🎲 Würfeln</button>
 </div>
 
 <div class="scene">
-    <div class="cube" id="cube">
-        <div class="face front">Front</div>
-        <div class="face back">Back</div>
-        <div class="face right">Right</div>
-        <div class="face left">Left</div>
-        <div class="face top">Top</div>
-        <div class="face bottom">Bottom</div>
-    </div>
+    <div class="cube" id="cube"></div>
 </div>
 
 <script>
 const cube = document.getElementById("cube");
-
-let isDragging = false;
-let lastX = 0, lastY = 0;
 let rotX = -20, rotY = 30;
-
-// feste Zielrotationen für jede Seite
-const sides = [
-    { x: 0,   y: 0   },   // front
-    { x: 0,   y: 180 },   // back
-    { x: 0,   y: -90 },   // right
-    { x: 0,   y: 90  },   // left
-    { x: -90, y: 0   },   // top
-    { x: 90,  y: 0   }    // bottom
-];
-
 cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
 
 // Maussteuerung
-cube.addEventListener("mousedown", e => {
-    isDragging = true;
-    lastX = e.clientX;
-    lastY = e.clientY;
-    cube.style.cursor = "grabbing";
-    cube.style.transition = "none";
-});
-
-window.addEventListener("mouseup", () => {
-    isDragging = false;
-    cube.style.cursor = "grab";
-});
-
+let isDragging = false, lastX = 0, lastY = 0;
+cube.addEventListener("mousedown", e => { isDragging = true; lastX=e.clientX; lastY=e.clientY; cube.style.cursor="grabbing"; cube.style.transition="none"; });
+window.addEventListener("mouseup", ()=> { isDragging=false; cube.style.cursor="grab"; });
 window.addEventListener("mousemove", e => {
-    if (!isDragging) return;
-
-    rotY += (e.clientX - lastX) * 0.5;
-    rotX -= (e.clientY - lastY) * 0.5;
-
-    lastX = e.clientX;
-    lastY = e.clientY;
-
+    if(!isDragging) return;
+    rotY += (e.clientX-lastX)*0.5;
+    rotX -= (e.clientY-lastY)*0.5;
+    lastX=e.clientX; lastY=e.clientY;
     cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
 });
 
-// Würfeln
-function rollCube() {
-    const side = sides[Math.floor(Math.random() * sides.length)];
+// Seiten-Infos
+const faces = [
+    {name:"front", color:"#e74c3c", x:0, y:0},
+    {name:"back",  color:"#8e44ad", x:0, y:180},
+    {name:"right", color:"#3498db", x:0, y:-90},
+    {name:"left",  color:"#f39c12", x:0, y:90},
+    {name:"top",   color:"#2ecc71", x:-90, y:0},
+    {name:"bottom",color:"#1abc9c", x:90, y:0}
+];
 
-    // extra Spins für Effekt
-    rotX = side.x + 360 * (Math.floor(Math.random() * 3) + 1);
-    rotY = side.y + 360 * (Math.floor(Math.random() * 3) + 1);
-
-    cube.style.transition = "transform 1s ease-in-out";
-    cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+// Cube aufbauen
+function updateCube(){
+    cube.innerHTML = "";
+    document.querySelectorAll(".panel input[type=text]").forEach((input,index)=>{
+        const checkbox = input.parentElement.querySelector('input[type=checkbox]');
+        if(!checkbox.checked) return;
+        const f = faces[index];
+        const div = document.createElement("div");
+        div.className = "face " + f.name;
+        div.style.background=f.color;
+        div.style.transform = `rotateX(${f.x}deg) rotateY(${f.y}deg) translateZ(100px)`;
+        div.textContent = input.value || f.name;
+        cube.appendChild(div);
+    });
 }
 
 // Text ändern
 function setText(face, value) {
-    document.querySelector("." + face).textContent = value || face;
+    const el = cube.querySelector("."+face);
+    if(el) el.textContent = value || face;
 }
+
+// Würfeln
+function rollCube() {
+    const currentFaces = Array.from(cube.children);
+    if(currentFaces.length===0) return;
+    const f = currentFaces[Math.floor(Math.random()*currentFaces.length)];
+    const faceData = faces.find(x=>x.name===f.className.split(" ")[1]);
+    rotX = faceData.x + 360*(Math.floor(Math.random()*3)+1);
+    rotY = faceData.y + 360*(Math.floor(Math.random()*3)+1);
+    cube.style.transition="transform 1s ease-in-out";
+    cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+}
+
+// Initial bauen
+updateCube();
 </script>
 
 </body>
