@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Interaktiver Würfel</title>
+<title>Würfel mit Zufall</title>
 
 <style>
 body {
@@ -22,11 +22,19 @@ body {
     box-sizing: border-box;
 }
 
-.panel input {
+.panel input, .panel button {
     width: 100%;
     margin-bottom: 10px;
-    padding: 6px;
+    padding: 8px;
     font-size: 14px;
+}
+
+.panel button {
+    cursor: pointer;
+    background: #3498db;
+    border: none;
+    color: white;
+    font-weight: bold;
 }
 
 /* 3D */
@@ -44,6 +52,7 @@ body {
     position: relative;
     transform-style: preserve-3d;
     cursor: grab;
+    transition: transform 1s ease-in-out;
 }
 
 .face {
@@ -78,6 +87,8 @@ body {
     <input placeholder="Left"   oninput="setText('left', this.value)">
     <input placeholder="Top"    oninput="setText('top', this.value)">
     <input placeholder="Bottom" oninput="setText('bottom', this.value)">
+
+    <button onclick="rollCube()">🎲 Würfeln</button>
 </div>
 
 <div class="scene">
@@ -93,9 +104,20 @@ body {
 
 <script>
 const cube = document.getElementById("cube");
+
 let isDragging = false;
 let lastX = 0, lastY = 0;
 let rotX = -20, rotY = 30;
+
+// feste Zielrotationen für jede Seite
+const sides = [
+    { x: 0,   y: 0   },   // front
+    { x: 0,   y: 180 },   // back
+    { x: 0,   y: -90 },   // right
+    { x: 0,   y: 90  },   // left
+    { x: -90, y: 0   },   // top
+    { x: 90,  y: 0   }    // bottom
+];
 
 cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
 
@@ -105,6 +127,7 @@ cube.addEventListener("mousedown", e => {
     lastX = e.clientX;
     lastY = e.clientY;
     cube.style.cursor = "grabbing";
+    cube.style.transition = "none";
 });
 
 window.addEventListener("mouseup", () => {
@@ -123,6 +146,18 @@ window.addEventListener("mousemove", e => {
 
     cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
 });
+
+// Würfeln
+function rollCube() {
+    const side = sides[Math.floor(Math.random() * sides.length)];
+
+    // extra Spins für Effekt
+    rotX = side.x + 360 * (Math.floor(Math.random() * 3) + 1);
+    rotY = side.y + 360 * (Math.floor(Math.random() * 3) + 1);
+
+    cube.style.transition = "transform 1s ease-in-out";
+    cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+}
 
 // Text ändern
 function setText(face, value) {
